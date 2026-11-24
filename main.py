@@ -9,19 +9,29 @@ in digits, no words, no punctuation, no second number.
 import os
 
 ENTRY = "843"
+OUT_PATH = "/output/entry.txt"
 
-# The kit's gate, asserted inline: 1 to 5 characters, digits only,
-# not only white space.
-assert 1 <= len(ENTRY) <= 5, "entry must be 1 to 5 characters"
-assert ENTRY.isdigit(), "entry must be digits only"
-assert ENTRY.strip(), "entry must not be only white space"
+
+def check_gate(text: str) -> None:
+    """The kit's gate: UTF-8 text of 1 to 5 characters, not only white
+    space, and exactly one number in digits with nothing else."""
+    assert 1 <= len(text) <= 5, "entry must be 1 to 5 characters"
+    assert text.isdigit(), "entry must be digits only"
+    assert text.strip(), "entry must not be only white space"
 
 
 def main() -> None:
-    os.makedirs("/output", exist_ok=True)
-    with open("/output/entry.txt", "w", encoding="utf-8") as f:
+    check_gate(ENTRY)
+    os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
+    with open(OUT_PATH, "w", encoding="utf-8") as f:
         f.write(ENTRY)
-    print(f"GATE OK: {len(ENTRY)} characters")
+    # Self-check: re-read what was written and hold it to the gate again,
+    # byte for byte, so a bad write can never pass silently.
+    with open(OUT_PATH, "r", encoding="utf-8") as f:
+        written = f.read()
+    check_gate(written)
+    assert written == ENTRY, "written entry must match byte for byte"
+    print(f"GATE OK: {len(written)} characters")
 
 
 if __name__ == "__main__":
